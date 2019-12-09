@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+	<context:component-scan base-package="com.neuedu.ttc"></context:component-scan>
+	<bean id="check" class="com.neuedu.ttc.aoptest.Check"></bean>
+	<!-- <bean id="Check2" class="com.neuedu.ttc.aoptest.Check2"></bean> -->
+	<bean id="deptdao" class="com.neuedu.ttc.dao.impl.DeptDaoImpl">
+	</bean>
+	<bean id="deptservice" class="com.neuedu.ttc.serviceimpl.DeptServiceImpl">
+
+	</bean>
+	<bean id="dept" class="com.neuedu.ttc.bean.Dept"></bean>
+	<!-- <aop:config proxy-target-class="false"> <aop:aspect ref="Check2"> <aop:before 
+		method="checkUser" pointcut="execution(* add*(..))"/> </aop:aspect> </aop:config> -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"
+		destroy-method="close" p:driverClassName="com.mysql.jdbc.Driver"
+		p:url="jdbc:mysql://localhost:3306/citybill" p:username="root"
+		p:password="root"></bean>
+	<bean id="jt" class="org.springframework.jdbc.core.JdbcTemplate"
+		p:dataSource-ref="dataSource"></bean>
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> 
+		
+	    <property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<tx:advice id="advice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="find*" propagation="SUPPORTS" />
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+	    <aop:pointcut expression="execution(* com.neuedu.ttc.service.*.*(..))" id="method"/>
+	    <aop:advisor advice-ref="advice" pointcut-ref="method"/>	
+	</aop:config>
+</beans>
